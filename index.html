@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AweLabs - FOOTCAST (демо)</title>
+<meta name="description" content="Демо AweLabs FOOTCAST: ML-прогнозы на футбол по пяти топ-лигам, ансамбль моделей, порог уверенности и автопост в Telegram-канал.">
+<meta name="theme-color" content="#0a0a0b">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0a0b'/%3E%3Cpath d='M6.5 12.2Q8 10 11 10q5 0 5 4v10M16 17.2h-4.6Q6.5 17.2 6.5 20.7T11.2 24.2q3.3 0 4.8-2.6' fill='none' stroke='%23e8f0e8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Crect x='19.5' y='8' width='6.5' height='16.5' fill='%2300ff41'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Unbounded:wght@400;600&family=Mulish:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0b;--bg2:#0d120e;--bg3:#121a14;--line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.13);--text:#e8f0e8;--muted:#7a857c;--g:#00ff41;--g2:#00b82e;--warn:#e8c45a;--red:#ff6b5a;--lime:#e8f55a;
+--head:'Unbounded',sans-serif;--body:'Mulish',sans-serif;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse at 50% 0%,#000 20%,transparent 70%);opacity:.6}
+a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.app{position:relative;display:grid;grid-template-rows:auto auto 1fr;height:100vh;max-width:1400px;margin:0 auto;padding:0 20px 20px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;height:64px;border-bottom:1px solid var(--line)}
+.logo{font:700 18px var(--mono);display:flex;align-items:center}.logo .u{color:var(--g)}
+.cur{display:inline-block;width:.55em;height:1.05em;background:var(--g);margin-left:4px;box-shadow:0 0 10px rgba(0,255,65,.5);animation:bl 1.05s steps(1) infinite}@keyframes bl{50%{opacity:0}}
+.ttl{font:12px var(--mono);color:var(--muted);display:flex;align-items:center;gap:10px}.ttl b{color:var(--text);font-weight:600;letter-spacing:.06em}
+.pill{border:1px solid rgba(0,255,65,.35);color:var(--g);border-radius:999px;padding:3px 10px;font:11px var(--mono)}
+.right{display:flex;align-items:center;gap:10px}
+.lang{display:flex;border:1px solid var(--line2);border-radius:999px;overflow:hidden}.lang button{color:var(--muted);font:500 12px var(--mono);padding:6px 12px}.lang button.on{background:var(--g);color:var(--bg)}
+.back{font:12px var(--mono);color:var(--muted)}.back:hover{color:var(--g)}
+.note{margin:14px 0;padding:10px 14px;border:1px dashed var(--line2);border-radius:10px;font:12px var(--mono);color:var(--muted)}.note b{color:var(--text);font-weight:500}
+.main{display:grid;grid-template-columns:260px 1fr 400px;gap:16px;min-height:0}
+.panel{background:var(--bg2);border:1px solid var(--line);border-radius:16px;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.side{padding:16px;gap:18px;overflow:auto}
+.side h4{font:11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+.lg{display:flex;flex-direction:column;gap:4px}
+.lg button{display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:10px;font-size:14px;color:var(--muted);text-align:left;border:1px solid transparent}
+.lg button.on{color:var(--text);border-color:rgba(0,255,65,.3);background:rgba(0,255,65,.06)}
+.lg button i{font:11px var(--mono);font-style:normal}
+.mm{display:flex;flex-direction:column;gap:8px}
+.mrow{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}.mrow b{font:500 13px var(--mono);color:var(--text)}
+.acc{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}
+.acc .bars{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.bar{font-size:12px;color:var(--muted)}.bar div{height:6px;border-radius:3px;background:var(--bg3);margin-top:4px;overflow:hidden}.bar div i{display:block;height:100%;background:var(--muted)}.bar.g div i{background:var(--g)}
+.thr{font-size:12.5px;color:var(--muted);padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg)}.thr b{color:var(--lime)}
+.tabs{display:flex;border-bottom:1px solid var(--line)}
+.tabs button{padding:13px 16px;font:12px var(--mono);color:var(--muted);border-bottom:2px solid transparent}.tabs button.on{color:var(--g);border-bottom-color:var(--g)}
+.list{flex:1;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.mt{display:grid;grid-template-columns:1fr auto;gap:10px 16px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg);text-align:left;transition:.2s;width:100%}
+.mt:hover{border-color:var(--line2)}.mt.sel{border-color:var(--g);box-shadow:0 0 0 1px rgba(0,255,65,.2)}
+.mt .lgn{font:11px var(--mono);color:var(--muted);grid-column:1/-1;display:flex;justify-content:space-between}
+.mt .tm{font-size:15px;font-weight:600}
+.mt .tm span{color:var(--muted);font-weight:400;margin:0 6px}
+.probs{grid-column:1/-1;display:flex;height:22px;border-radius:6px;overflow:hidden;font:600 11px var(--mono)}
+.probs div{display:grid;place-items:center;color:var(--bg)}
+.p1{background:var(--g)}.px{background:#3a4a3d;color:var(--text)!important}.p2{background:var(--g2)}
+.mt.skip .p1,.mt.skip .p2{background:#2c3a2f;color:var(--muted)}
+.badge{font:11px var(--mono);padding:4px 10px;border-radius:999px;border:1px solid;white-space:nowrap}
+.badge.pub{color:var(--lime);border-color:rgba(232,245,90,.5);background:rgba(232,245,90,.08)}
+.badge.skp{color:var(--muted);border-color:var(--line2)}
+.badge.hit{color:var(--g);border-color:rgba(0,255,65,.45)}.badge.mis{color:var(--red);border-color:rgba(255,107,90,.45)}
+.det{overflow:auto;padding:16px;gap:14px}
+.box{border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:14px}
+.box h5{font:11px var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;justify-content:space-between}
+.hd{font-family:var(--head);font-size:17px;margin-bottom:4px}
+.sub{font:12px var(--mono);color:var(--muted)}
+.ens{display:flex;flex-direction:column;gap:7px}
+.ens div{display:grid;grid-template-columns:44px 1fr 46px;gap:10px;align-items:center;font:12px var(--mono);color:var(--muted)}
+.ens div span:nth-child(2){height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;position:relative}
+.ens div span:nth-child(2) i{position:absolute;inset:0 auto 0 0;background:var(--g2)}
+.ens div.agg{color:var(--text)}.ens div.agg span:nth-child(2) i{background:var(--g)}
+.ens div b{text-align:right;font-weight:500;color:var(--text)}
+.fac{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:13.5px}
+.fac li{display:flex;gap:10px}.fac li i{font-style:normal;font:11px var(--mono);color:var(--g);min-width:52px}
+.dec{padding:14px;border-radius:14px;font-size:14px}
+.dec.pub{border:1px solid rgba(232,245,90,.4);background:rgba(232,245,90,.06)}.dec.pub b{color:var(--lime)}
+.dec.skp{border:1px solid var(--line2);background:var(--bg)}.dec.skp b{color:var(--muted)}
+.post{border:1px solid var(--line2);border-radius:14px;background:#0f1612;padding:14px;font-size:14px;white-space:pre-line}
+.post .ch{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-weight:600;font-size:13px}
+.post .ch i{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--g2),var(--bg3));display:grid;place-items:center;font:700 11px var(--mono);color:var(--bg);font-style:normal}
+.post small{display:block;text-align:right;font:10.5px var(--mono);color:var(--muted);margin-top:6px}
+.res{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);font-size:14px}
+.res .sc{font:500 14px var(--mono)}
+.res small{display:block;font:11px var(--mono);color:var(--muted)}
+.sum{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+.sum div{border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg)}.sum b{display:block;font:500 22px var(--head)}.sum span{font-size:12px;color:var(--muted)}.sum .g b{color:var(--g)}
+.hint{font:11.5px var(--mono);color:var(--muted);padding:2px 2px 6px}
+@media(max-width:1180px){.main{grid-template-columns:1fr 380px}.side{display:none}}
+@media(max-width:820px){.app{height:auto;min-height:100vh}.main{grid-template-columns:1fr}.listp{height:70vh}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div style="display:flex;align-items:center;gap:18px">
+      <a class="logo" href="https://awelabs.io" aria-label="AweLabs">awe<span class="u">_</span>labs<span class="cur"></span></a>
+      <div class="ttl"><b>FOOTCAST</b><span data-i="sub"></span><span class="pill">demo</span></div>
+    </div>
+    <div class="right"><a class="back" href="https://awelabs.io/#products" data-i="back"></a><div class="lang"><button data-set="ru">RU</button><button data-set="en">EN</button></div></div>
+  </div>
+  <div class="note" data-i="note" data-html></div>
+  <div class="main">
+    <aside class="panel side">
+      <div><h4 data-i="hLg"></h4><div class="lg" id="lg"></div></div>
+      <div><h4 data-i="hModel"></h4>
+        <div class="mm" id="mm"></div>
+      </div>
+      <div class="acc"><div class="sub" data-i="hAcc"></div><div class="bars">
+        <div class="bar g"><span data-i="aModel"></span> <b class="mono" style="color:var(--g)">52.8%</b><div><i style="width:52.8%"></i></div></div>
+        <div class="bar"><span data-i="aBase"></span> <b class="mono">44.0%</b><div><i style="width:44%"></i></div></div>
+      </div></div>
+      <div class="thr" data-i="thr" data-html></div>
+    </aside>
+    <section class="panel listp">
+      <div class="tabs"><button class="on" data-t="up" data-i="tUp"></button><button data-t="done" data-i="tDone"></button></div>
+      <div class="list" id="list"></div>
+    </section>
+    <section class="panel det" id="det"></section>
+  </div>
+</div>
+<script>
+var LG={epl:["АПЛ","Premier League","ENG"],lal:["Ла Лига","La Liga","ESP"],bun:["Бундеслига","Bundesliga","GER"],sea:["Серия А","Serie A","ITA"],l1:["Лига 1","Ligue 1","FRA"]};
+// [league, homeRU, homeEN, awayRU, awayEN, time, H, D, A, score, ensemble[N1..N5], factors key]
+var M=[
+ ["epl","Арсенал","Arsenal","Брайтон","Brighton","Сб 19:30",64,21,15,"2:0",[61,66,63,60,67],"a"],
+ ["epl","Челси","Chelsea","Ньюкасл","Newcastle","Сб 22:00",41,27,32,"1:1",[44,38,42,40,41],"b"],
+ ["lal","Барселона","Barcelona","Севилья","Sevilla","Сб 23:00",71,17,12,"2:1",[69,74,70,68,73],"c"],
+ ["lal","Атлетико","Atletico","Вильярреал","Villarreal","Вс 21:00",48,29,23,"1:0",[51,45,49,47,48],"d"],
+ ["bun","Бавария","Bayern","Фрайбург","Freiburg","Сб 21:30",76,14,10,"3:1",[78,74,77,73,79],"e"],
+ ["sea","Интер","Inter","Лацио","Lazio","Вс 02:45",58,24,18,"2:1",[60,55,59,57,58],"f"],
+ ["sea","Наполи","Napoli","Ювентус","Juventus","Вс 00:00",35,28,37,"1:1",[33,38,36,37,34],"g"],
+ ["l1","Ланс","Lens","ПСЖ","PSG","Вс 03:00",18,20,62,"0:2",[60,64,61,63,62],"h"],
+ ["l1","Лион","Lyon","Нант","Nantes","Вс 23:00",61,22,17,"2:1",[63,58,62,60,61],"i"]
+];
+var F={
+ ru:{a:[["xG","форма за 5 матчей: 2.1 против 1.2"],["дома","5 побед в последних 6 домашних"],["новости","у гостей травмирован основной вратарь"]],
+     b:[["xG","почти равная форма: 1.6 против 1.5"],["новости","у хозяев под вопросом двое из защиты"]],
+     c:[["xG","2.4 против 1.0 за 5 матчей"],["очные","4 победы в последних 5 очных"],["новости","гости играют третий матч за 7 дней"]],
+     d:[["xG","1.4 против 1.3"],["новости","составы без потерь с обеих сторон"]],
+     e:[["xG","2.9 против 1.1"],["дома","без поражений дома в сезоне"],["новости","у гостей дисквалифицирован опорник"]],
+     f:[["xG","1.9 против 1.4"],["новости","хозяева сыграли в среду в еврокубке"]],
+     g:[["xG","1.5 против 1.6"],["очные","3 ничьи в последних 5 очных"]],
+     h:[["xG","0.9 против 2.3"],["правило","гостевой фаворит: нужен порог 65%"]],
+     i:[["xG","1.8 против 1.1"],["дома","4 победы подряд дома"],["новости","у гостей травма лучшего бомбардира"]]},
+ en:{a:[["xG","last 5 form: 2.1 vs 1.2"],["home","5 wins in the last 6 home games"],["news","the visitors' first-choice keeper is injured"]],
+     b:[["xG","near-equal form: 1.6 vs 1.5"],["news","two home defenders are doubtful"]],
+     c:[["xG","2.4 vs 1.0 over 5 games"],["h2h","4 wins in the last 5 meetings"],["news","the visitors play their third game in 7 days"]],
+     d:[["xG","1.4 vs 1.3"],["news","no absences on either side"]],
+     e:[["xG","2.9 vs 1.1"],["home","unbeaten at home this season"],["news","the visitors' holding midfielder is suspended"]],
+     f:[["xG","1.9 vs 1.4"],["news","the hosts played in Europe on Wednesday"]],
+     g:[["xG","1.5 vs 1.6"],["h2h","3 draws in the last 5 meetings"]],
+     h:[["xG","0.9 vs 2.3"],["rule","away favourite: needs the 65% threshold"]],
+     i:[["xG","1.8 vs 1.1"],["home","4 home wins in a row"],["news","the visitors' top scorer is injured"]]}};
+// previous round results: [homeRU,homeEN,awayRU,awayEN,league,pickRU,pickEN,conf,predScore,realScore,hit]
+var R=[["Ливерпуль","Liverpool","Вест Хэм","West Ham","epl","П1","1",67,"2:0","3:1",1],
+ ["Реал Мадрид","Real Madrid","Хетафе","Getafe","lal","П1","1",73,"2:0","2:0",1],
+ ["Дортмунд","Dortmund","Майнц","Mainz","bun","П1","1",62,"2:1","1:1",0],
+ ["Аталанта","Atalanta","Лечче","Lecce","sea","П1","1",66,"2:0","2:1",1],
+ ["ПСЖ","PSG","Тулуза","Toulouse","l1","П1","1",71,"3:0","4:1",1],
+ ["Ман Сити","Man City","Брентфорд","Brentford","epl","П1","1",69,"2:0","1:2",0]];
+var T={
+ru:{sub:"ML-прогнозы на футбол",back:"← на awelabs.io",note:"<b>Демо на примерных данных.</b> Матчи, вероятности и новости показаны для иллюстрации. Метрики модели и пороги - как в настоящей системе.",
+hLg:"Лиги",all:"Все",hModel:"Модель",hAcc:"Точность исхода, все матчи",aModel:"Модель",aBase:"Базовый уровень",
+thr:"Публикуются только прогнозы с уверенностью <b>60%+</b>, для гостевых фаворитов <b>65%+</b>. Остальные матчи бот пропускает.",
+mm:[["База матчей","14 001"],["Сезонов","8"],["Лиг","5"],["Ансамбль","N1-N5"],["Валидация","TimeSeriesSplit"]],
+tUp:"Ближайший тур",tDone:"Прошлый тур",pub:"в канал",skp:"пропуск",hint:"Нажмите на матч, чтобы увидеть разбор",
+ens:"Ансамбль моделей",agg:"итог",fac:"Факторы",facN:"новости собирает Claude с веб-поиском",dec:"Решение",
+dPub:"<b>Публикуем.</b> Уверенность {c}% выше порога {t}%.",dSkp:"<b>Пропускаем.</b> Уверенность {c}% ниже порога {t}%. В канал не уходит.",
+post:"Пост в канал",chN:"FOOTCAST",win:"победа",draw:"ничья",score:"Счёт",why:"Почему",conf:"Уверенность",
+s1:"опубликовано",s2:"угадан исход",s3:"точный счёт",pick:"прогноз",real:"итог",hd2:"После матча",hd2t:"Бот сам проверяет результат и обновляет точность модели.",cw:"П1",cx:"X",ca:"П2"},
+en:{sub:"ML football forecasts",back:"← back to awelabs.io",note:"<b>Demo with sample data.</b> Fixtures, probabilities and news are illustrative. Model metrics and thresholds are as in the real system.",
+hLg:"Leagues",all:"All",hModel:"Model",hAcc:"Outcome accuracy, all matches",aModel:"Model",aBase:"Baseline",
+thr:"Only forecasts with <b>60%+</b> confidence are published, <b>65%+</b> for away favourites. The bot skips the rest.",
+mm:[["Matches in base","14,001"],["Seasons","8"],["Leagues","5"],["Ensemble","N1-N5"],["Validation","TimeSeriesSplit"]],
+tUp:"Next round",tDone:"Last round",pub:"to channel",skp:"skipped",hint:"Click a match to see the breakdown",
+ens:"Model ensemble",agg:"final",fac:"Factors",facN:"news gathered by Claude with web search",dec:"Decision",
+dPub:"<b>Publish.</b> Confidence {c}% is above the {t}% threshold.",dSkp:"<b>Skip.</b> Confidence {c}% is below the {t}% threshold. Not posted.",
+post:"Channel post",chN:"FOOTCAST",win:"win for",draw:"draw",score:"Score",why:"Why",conf:"Confidence",
+s1:"published",s2:"outcome hit",s3:"exact score",pick:"pick",real:"result",hd2:"After the match",hd2t:"The bot checks the result itself and updates the model's accuracy.",cw:"1",cx:"X",ca:"2"}};
+var L='ru';try{L=localStorage.getItem('fc_lang')||((navigator.language||'').slice(0,2)==='ru'?'ru':'en')}catch(e){}
+var $=function(i){return document.getElementById(i)},lgSel='all',tab='up',sel=0;
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function nm(m,h){return L==='ru'?(h?m[1]:m[3]):(h?m[2]:m[4])}
+function tm(m){if(L==='ru')return m[5];return m[5].replace('Сб','Sat').replace('Вс','Sun')}
+function best(m){var h=m[6],d=m[7],a=m[8];if(h>=d&&h>=a)return['h',h];if(a>=d)return['a',a];return['d',d]}
+function thr(m){return best(m)[0]==='a'?65:60}
+function isPub(m){var b=best(m);return b[0]!=='d'&&b[1]>=thr(m)}
+function apply(){
+  document.documentElement.lang=L;var t=T[L];
+  document.querySelectorAll('[data-i]').forEach(function(el){var v=t[el.dataset.i];if(v==null)return;el.hasAttribute('data-html')?el.innerHTML=v:el.textContent=v});
+  document.querySelectorAll('.lang button').forEach(function(b){b.classList.toggle('on',b.dataset.set===L)});
+  $('mm').innerHTML=t.mm.map(function(r){return'<div class="mrow">'+esc(r[0])+'<b>'+esc(r[1])+'</b></div>'}).join('');
+  var ks=['all'].concat(Object.keys(LG));
+  $('lg').innerHTML=ks.map(function(k){var n=k==='all'?M.length:M.filter(function(m){return m[0]===k}).length;
+    return'<button data-l="'+k+'" class="'+(k===lgSel?'on':'')+'"><span>'+(k==='all'?t.all:LG[k][L==='ru'?0:1])+'</span><i>'+n+'</i></button>'}).join('');
+  document.querySelectorAll('[data-l]').forEach(function(b){b.onclick=function(){lgSel=b.dataset.l;apply()}});
+  document.querySelectorAll('.tabs button').forEach(function(b){b.classList.toggle('on',b.dataset.t===tab);b.onclick=function(){tab=b.dataset.t;apply()}});
+  tab==='up'?renderUp():renderDone();
+}
+function renderUp(){var t=T[L];
+  var ms=M.map(function(m,i){return[m,i]}).filter(function(x){return lgSel==='all'||x[0][0]===lgSel});
+  if(!ms.some(function(x){return x[1]===sel}))sel=ms.length?ms[0][1]:0;
+  $('list').innerHTML='<div class="hint">'+t.hint+'</div>'+ms.map(function(x){var m=x[0],i=x[1],p=isPub(m);
+    return'<button class="mt'+(p?'':' skip')+(i===sel?' sel':'')+'" data-m="'+i+'"><div class="lgn"><span>'+LG[m[0]][L==='ru'?0:1]+'</span><span>'+tm(m)+'</span></div>'+
+    '<div class="tm">'+esc(nm(m,1))+'<span>-</span>'+esc(nm(m,0))+'</div><span class="badge '+(p?'pub':'skp')+'">'+(p?'● '+t.pub:t.skp)+'</span>'+
+    '<div class="probs"><div class="p1" style="width:'+m[6]+'%">'+m[6]+'%</div><div class="px" style="width:'+m[7]+'%">'+m[7]+'%</div><div class="p2" style="width:'+m[8]+'%">'+m[8]+'%</div></div></button>'}).join('');
+  document.querySelectorAll('[data-m]').forEach(function(b){b.onclick=function(){sel=+b.dataset.m;renderUp()}});
+  renderDet();
+}
+function renderDet(){var t=T[L],m=M[sel],b=best(m),p=isPub(m),th=thr(m);
+  var pickTxt=b[0]==='h'?t.win+' '+nm(m,1):b[0]==='a'?t.win+' '+nm(m,0):t.draw;
+  if(L==='ru')pickTxt=b[0]==='h'?'П1, '+nm(m,1):b[0]==='a'?'П2, '+nm(m,0):'ничья';else pickTxt=b[0]==='d'?'draw':(b[0]==='h'?nm(m,1):nm(m,0))+' win';
+  var ens=m[10].map(function(v,i){return'<div><span>N'+(i+1)+'</span><span><i style="width:'+v+'%"></i></span><b>'+v+'%</b></div>'}).join('')+
+    '<div class="agg"><span>'+t.agg+'</span><span><i style="width:'+b[1]+'%"></i></span><b>'+b[1]+'%</b></div>';
+  var fac=F[L][m[11]].map(function(f){return'<li><i>'+esc(f[0])+'</i><span>'+esc(f[1])+'</span></li>'}).join('');
+  var why=F[L][m[11]].filter(function(f){return f[0]!=='rule'&&f[0]!=='правило'}).slice(0,2).map(function(f){return f[1]}).join('; ');
+  var post=p?'<div class="box" style="padding:0;border:0;background:none"><h5 style="padding:0 2px">'+t.post+'</h5><div class="post"><div class="ch"><i>FC</i>'+t.chN+'</div>'+
+    '⚽ '+LG[m[0]][L==='ru'?0:1]+' · '+esc(nm(m,1))+' - '+esc(nm(m,0))+' · '+tm(m)+'\n'+
+    (L==='ru'?'Прогноз: ':'Pick: ')+esc(pickTxt)+' ('+b[1]+'%)\n'+t.score+': '+m[9]+'\n'+t.why+': '+esc(why)+'<small>'+tm(m).split(' ')[1]+' · ✓✓</small></div></div>':'';
+  $('det').innerHTML='<div class="box"><div class="sub">'+LG[m[0]][L==='ru'?0:1]+' · '+tm(m)+'</div><div class="hd">'+esc(nm(m,1))+' - '+esc(nm(m,0))+'</div>'+
+    '<div class="probs" style="margin-top:10px"><div class="p1" style="width:'+m[6]+'%">'+t.cw+' '+m[6]+'%</div><div class="px" style="width:'+m[7]+'%">'+t.cx+'</div><div class="p2" style="width:'+m[8]+'%">'+t.ca+' '+m[8]+'%</div></div></div>'+
+    '<div class="box"><h5>'+t.ens+'</h5><div class="ens">'+ens+'</div></div>'+
+    '<div class="box"><h5><span>'+t.fac+'</span></h5><ul class="fac">'+fac+'</ul><div class="sub" style="margin-top:10px">'+t.facN+'</div></div>'+
+    '<div class="dec '+(p?'pub':'skp')+'">'+(p?t.dPub:t.dSkp).replace('{c}',b[1]).replace('{t}',th)+'</div>'+post;
+}
+function renderDone(){var t=T[L];
+  var rs=R.filter(function(r){return lgSel==='all'||r[4]===lgSel});
+  var hit=R.filter(function(r){return r[10]}).length,ex=R.filter(function(r){return r[8]===r[9]}).length;
+  $('list').innerHTML='<div class="sum"><div><b>'+R.length+'</b><span>'+t.s1+'</span></div><div class="g"><b>'+hit+'/'+R.length+'</b><span>'+t.s2+'</span></div><div><b>'+ex+'</b><span>'+t.s3+'</span></div></div>'+
+   rs.map(function(r){return'<div class="res"><div>'+esc(L==='ru'?r[0]:r[1])+' - '+esc(L==='ru'?r[2]:r[3])+'<small>'+LG[r[4]][L==='ru'?0:1]+' · '+t.pick+' '+(L==='ru'?r[5]:r[6])+' ('+r[7]+'%) · '+r[8]+'</small></div><div class="sc">'+r[9]+'</div><span class="badge '+(r[10]?'hit':'mis')+'">'+(r[10]?'✓':'✕')+'</span></div>'}).join('');
+  $('det').innerHTML='<div class="box"><h5>'+t.hd2+'</h5><p style="font-size:14px;color:var(--muted)">'+t.hd2t+'</p></div>'+
+   '<div class="box"><h5>'+t.hAcc+'</h5><div class="bars" style="display:flex;flex-direction:column;gap:10px"><div class="bar g"><span>'+t.aModel+'</span> <b class="mono" style="color:var(--g)">52.8%</b><div><i style="width:52.8%"></i></div></div><div class="bar"><span>'+t.aBase+'</span> <b class="mono">44.0%</b><div><i style="width:44%"></i></div></div></div></div>';
+}
+document.querySelectorAll('.lang button').forEach(function(b){b.onclick=function(){L=b.dataset.set;try{localStorage.setItem('fc_lang',L)}catch(e){}apply()}});
+apply();
+</script>
+</body>
+</html>
