@@ -268,7 +268,7 @@ apply();
   label();new MutationObserver(function(){label()}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
   function go(){var el=document.querySelector(CFG.pick);if(!el)return false;el.click();
     setTimeout(function(){var t=document.querySelector(CFG.target);t=t?(t.closest('.panel')||t):null;if(t){window.scrollTo({top:t.getBoundingClientRect().top+window.pageYOffset-8,behavior:'smooth'})}},150);return true}
-  b.onclick=function(){if(go())return;b.disabled=true;label(CFG.wait[lang()]);var n=0,iv=setInterval(function(){n++;if(go()||n>40){clearInterval(iv);b.disabled=false;label()}},400)};
+  b.onclick=function(){if(go())return;b.disabled=true;label(CFG.wait[lang()]);var n=0,iv=setInterval(function(){n++;if(CFG.force){try{window[CFG.force]()}catch(e){}}if(go()||n>40){clearInterval(iv);b.disabled=false;label()}},400)};
 })();
 </script>
 <!-- AweLabs analytics -->
